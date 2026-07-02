@@ -4,7 +4,7 @@ import { join } from "path";
 import { Readable } from "stream";
 import { pipeline } from "stream/promises";
 
-const CACHE_DIR = join(process.cwd(), ".video-cache");
+const CACHE_DIR = join('/tmp', '.video-cache');
 
 async function fetchDriveFile(id: string, userAgent: string, confirmToken?: string, rangeHeader?: string | null): Promise<Response> {
   const url = confirmToken

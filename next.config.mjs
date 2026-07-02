@@ -8,6 +8,18 @@ const nextConfig = {
       },
     ],
   },
+  // Exclude local caches from the serverless function bundle
+  outputFileTracingExcludes: {
+    '/api/video/stream': [
+      '**/.video-cache/**',
+      '.video-cache/**',
+    ],
+    '*': [
+      '**/.video-cache/**',
+      '.video-cache/**',
+      'studio-22nd-avenue-backend/**',
+    ],
+  },
 };
 
 export default nextConfig;
