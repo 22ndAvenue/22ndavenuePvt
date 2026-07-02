@@ -1,4 +1,4 @@
-import { groq } from 'next-sanity'
+import groq from 'groq'
 
 export const heroQuery = groq`*[_type == "hero"] | order(_updatedAt desc)[0] {
   "desktopVideoUrl": coalesce(desktopVideoUrl, desktopVideo.asset->url),
