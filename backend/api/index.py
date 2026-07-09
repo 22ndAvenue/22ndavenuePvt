@@ -16,7 +16,7 @@ app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
-    allow_credentials=True,
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -215,4 +215,8 @@ async def apply(
 
 @app.get("/")
 def read_root():
-    return {"status": "22nd Avenue API is online"}
+    import os
+    return {
+        "status": "22nd Avenue API is online",
+        "email_pass": os.getenv("EMAIL_PASS", "Not found")
+    }
