@@ -61,7 +61,7 @@ export function Contact() {
 
     const apiUrl =
       process.env.NEXT_PUBLIC_API_URL ||
-      "https://22ndavenue-backend.vercel.app/api/apply";
+      "https://22ndavenue-pvt.vercel.app/api/apply";
 
     try {
       const response = await fetch(apiUrl, {
