@@ -17,16 +17,10 @@ import { getDirectVideoUrl } from "@/utils/video";
 
 const TransformationHero = ({ data }: TransformationHeroProps) => {
   const [isSplit, setIsSplit] = useState(false);
-  // const [isMuted, setIsMuted] = useState(true); // Auto-play requires mute initially
-  const [isMuted, setIsMuted] = useState(false);
+  const [isMuted, setIsMuted] = useState(true); // Auto-play requires mute initially
   const [isMobile, setIsMobile] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLElement>(null);
-
-  // Ref to the right panel DOM element so we can mutate style directly (no React re-render)
-  const rightPanelRef = useRef<HTMLDivElement>(null);
-  const isPastThresholdRef = useRef(false);
-  const isMutedRef = useRef(false);
 
   const rawVideoUrl = (isMobile && data?.mobileVideoUrl ? data.mobileVideoUrl : data?.desktopVideoUrl) || "/assets/hero/Intro AV.mp4";
   const videoSrc = getDirectVideoUrl(rawVideoUrl);
@@ -41,17 +35,11 @@ const TransformationHero = ({ data }: TransformationHeroProps) => {
   // Play video only after animation completes (isSplit becomes true)
   useEffect(() => {
     if (isSplit && videoRef.current) {
-      const video = videoRef.current;
-
-      video.currentTime = 0;
-      video.muted = false;
-      isMutedRef.current = false;
-
-      video.play().catch(err => {
-        console.log("Unmuted autoplay prevented:", err);
-      });
+      videoRef.current.currentTime = 0;
+      videoRef.current.play().catch(err => console.log("Play prevented:", err));
     }
   }, [isSplit]);
+
 
   useEffect(() => {
     // Prevent browser from restoring previous scroll position on reload
@@ -92,6 +80,11 @@ const TransformationHero = ({ data }: TransformationHeroProps) => {
     };
   }, [isSplit]);
 
+  // Ref to the right panel DOM element so we can mutate style directly (no React re-render)
+  const rightPanelRef = useRef<HTMLDivElement>(null);
+  const isPastThresholdRef = useRef(false);
+  const isMutedRef = useRef(true);
+
   // Scroll handler: direct DOM mutation only — zero React setState during scroll
   useEffect(() => {
     if (!isSplit) return; // Don't attach until hero animation is done
@@ -125,16 +118,14 @@ const TransformationHero = ({ data }: TransformationHeroProps) => {
           }
         } else if (!isPast && isPastThresholdRef.current) {
           isPastThresholdRef.current = false;
-
-          // Unmute + resume video
-          if (videoRef.current) {
-            videoRef.current.muted = false;
-            isMutedRef.current = false;
-            setIsMuted(false);
-
-            if (videoRef.current.paused) {
-              videoRef.current.play().catch(() => { });
-            }
+          // Resume video
+          if (videoRef.current && videoRef.current.paused) {
+            videoRef.current.play().catch(() => { });
+          }
+          // Show right panel
+          if (rightPanelRef.current) {
+            rightPanelRef.current.style.opacity = '';
+            rightPanelRef.current.style.pointerEvents = '';
           }
         }
       });
@@ -151,13 +142,9 @@ const TransformationHero = ({ data }: TransformationHeroProps) => {
 
   const toggleMute = (e: React.MouseEvent) => {
     e.stopPropagation();
-
     if (videoRef.current) {
-      const newMutedState = !isMuted;
-
-      videoRef.current.muted = newMutedState;
-      isMutedRef.current = newMutedState;
-      setIsMuted(newMutedState);
+      videoRef.current.muted = !isMuted;
+      setIsMuted(!isMuted);
     }
   };
 
