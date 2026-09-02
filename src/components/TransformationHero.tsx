@@ -17,7 +17,7 @@ import { getDirectVideoUrl } from "@/utils/video";
 
 const TransformationHero = ({ data }: TransformationHeroProps) => {
   const [isSplit, setIsSplit] = useState(false);
-  const [isMuted, setIsMuted] = useState(false); // Auto-play requires mute initially
+  const [isMuted, setIsMuted] = useState(true); // Auto-play requires mute initially
   const [isMobile, setIsMobile] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLElement>(null);
