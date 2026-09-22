@@ -1,0 +1,7 @@
+# Netlify serves public/ directly and ignores next.config headers();
+# these make bundled media cacheable for a year (files are content-addressed by Drive ID).
+/videos/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
