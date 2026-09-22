@@ -38,12 +38,54 @@ const TransformationHero = ({ data }: TransformationHeroProps) => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Play video only after animation completes (isSplit becomes true)
+  // Warm-up: start the muted video as soon as it has a src, while the panel is
+  // still invisible behind the splash. iOS ignores preload="auto" and only
+  // buffers once playback starts, so this is what makes the reveal instant.
   useEffect(() => {
-    if (isSplit && videoRef.current) {
-      videoRef.current.currentTime = 0;
-      videoRef.current.play().then(() => setNeedsTap(false)).catch(() => setNeedsTap(true));
-    }
+    const v = videoRef.current;
+    if (!mounted || !v) return;
+    v.defaultMuted = true;
+    v.muted = true;
+    v.setAttribute("muted", "");
+    v.play().catch(() => { /* fine — the reveal effect below retries */ });
+  }, [mounted, videoSrc]);
+
+  // Play video only after animation completes (isSplit becomes true).
+  // iOS Safari is picky: it ignores preload, may reject play() until enough data
+  // is buffered, and blocks autoplay entirely in Low Power Mode. So: retry when
+  // the media becomes ready, retry on the first touch anywhere, and only show
+  // the tap-to-play button if it's still not playing after a grace period.
+  useEffect(() => {
+    const v = videoRef.current;
+    if (!isSplit || !v) return;
+
+    // WebKit checks the *attribute* for its muted-autoplay exemption
+    v.defaultMuted = true;
+    v.muted = true;
+    v.setAttribute("muted", "");
+
+    let done = false;
+    const tryPlay = () => {
+      if (done || !v.paused) return;
+      v.play().then(() => { done = true; setNeedsTap(false); }).catch(() => { /* retried below */ });
+    };
+
+    v.currentTime = 0;
+    tryPlay();
+    v.addEventListener("loadeddata", tryPlay);
+    v.addEventListener("canplay", tryPlay);
+    document.addEventListener("touchstart", tryPlay, { passive: true });
+    document.addEventListener("click", tryPlay);
+
+    const graceTimer = setTimeout(() => { if (v.paused) setNeedsTap(true); }, 2500);
+
+    return () => {
+      clearTimeout(graceTimer);
+      v.removeEventListener("loadeddata", tryPlay);
+      v.removeEventListener("canplay", tryPlay);
+      document.removeEventListener("touchstart", tryPlay);
+      document.removeEventListener("click", tryPlay);
+    };
   }, [isSplit]);
 
 
@@ -198,7 +240,7 @@ const TransformationHero = ({ data }: TransformationHeroProps) => {
           />
           {needsTap && (
             <button className={styles.tapToPlay} onClick={playOnTap} aria-label="Play video">
-              ▶
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z" /></svg>
             </button>
           )}
         </div>
