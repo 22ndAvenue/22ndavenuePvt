@@ -94,9 +94,10 @@ const TransformationHero = ({ data }: TransformationHeroProps) => {
     // Force scroll to top immediately on load
     window.scrollTo(0, 0);
 
+    // Last splash word finishes animating at ~2.9s; split right after
     const splitTimer = setTimeout(() => {
       setIsSplit(true);
-    }, 3800);
+    }, 3200);
 
     return () => clearTimeout(splitTimer);
   }, []);
