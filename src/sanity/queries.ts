@@ -10,7 +10,7 @@ export const aboutQuery = groq`*[_type == "about"] | order(_updatedAt desc)[0] {
   "directors": directors[] {
     name,
     title,
-    "image": image.asset->url + "?w=800&h=1000&fit=crop&auto=format&q=80&fm=webp"
+    "image": image.asset->url + "?w=800&h=1000&fit=crop&auto=format&q=75&fm=webp"
   },
   story
 }`
@@ -57,14 +57,14 @@ export const servicesQuery = groq`*[_type == "services"] | order(_updatedAt desc
     title,
     enableGallery,
     description,
-    "image": select(defined(image.asset) => image.asset->url + "?w=900&h=600&fit=crop&auto=format&q=80&fm=webp"),
+    "image": select(defined(image.asset) => image.asset->url + "?w=900&h=600&fit=crop&auto=format&q=75&fm=webp"),
     shape,
     bulkVideoUrls,
     "gallery": gallery[] {
       type,
-      "image": select(defined(image.asset) => image.asset->url + "?w=1200&auto=format&q=80&fm=webp"),
+      "image": select(defined(image.asset) => image.asset->url + "?w=1200&auto=format&q=75&fm=webp"),
       "videoUrl": coalesce(videoUrl, videoFile.asset->url),
-      "thumbnail": select(defined(thumbnail.asset) => thumbnail.asset->url + "?w=800&h=450&fit=crop&auto=format&q=80&fm=webp")
+      "thumbnail": select(defined(thumbnail.asset) => thumbnail.asset->url + "?w=800&h=450&fit=crop&auto=format&q=75&fm=webp")
     }
   }
 }`

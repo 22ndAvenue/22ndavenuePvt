@@ -138,6 +138,8 @@ export async function GET(request: NextRequest) {
     const headers = new Headers();
     headers.set("Content-Type", contentType);
     headers.set("Accept-Ranges", "bytes");
+    // Let the CDN edge keep a copy so repeat plays don't re-invoke this function
+    headers.set("Cache-Control", "public, max-age=86400, s-maxage=31536000, immutable");
 
     const driveContentRange = driveResponse.headers.get("content-range");
     const driveContentLength = driveResponse.headers.get("content-length");

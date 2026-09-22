@@ -36,3 +36,10 @@ next-env.d.ts
 .video-cache/
 
 .env
+# secrets & python artifacts
+backend/.env
+__pycache__/
+*.pyc
+
+# netlify
+.netlify/

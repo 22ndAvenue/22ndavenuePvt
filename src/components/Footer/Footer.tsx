@@ -92,7 +92,7 @@ export function Footer() {
             <div className={styles.brandTop}>
               <Link href="/" className={styles.logo}>
                 <img
-                  src="/assets/hero/logo.png"
+                  src="/assets/hero/logo.webp"
                   alt="22nd Avenue Logo"
                   className={styles.footerLogo}
                 />

@@ -24,8 +24,10 @@ import {
   statsQuery
 } from "@/sanity/queries";
 
-// Revalidate page on every request to ensure data is loaded as soon as it's changed
-export const revalidate = 0;
+// Serve a CDN-cached copy of the page and rebuild it at most once an hour.
+// Sanity's publish webhook calls /api/revalidate, so CMS edits still show up
+// within seconds — without running a server function for every visitor.
+export const revalidate = 3600;
 
 export default async function HomePage() {
   // Initialize with null so we can check if fetch succeeded
@@ -46,15 +48,15 @@ export default async function HomePage() {
     try {
       console.log(`Attempting to fetch data for project: ${projectId}`);
       const results = await Promise.all([
-        client.fetch(heroQuery, {}, { next: { revalidate: 0 } }),
-        client.fetch(aboutQuery, {}, { next: { revalidate: 0 } }),
-        client.fetch(collabsQuery, {}, { next: { revalidate: 0 } }),
-        client.fetch(momentsQuery, {}, { next: { revalidate: 0 } }),
-        client.fetch(testimonialsQuery, {}, { next: { revalidate: 0 } }),
-        client.fetch(servicesQuery, {}, { next: { revalidate: 0 } }),
-        client.fetch(footprintQuery, {}, { next: { revalidate: 0 } }),
-        client.fetch(showrunnersQuery, {}, { next: { revalidate: 0 } }),
-        client.fetch(statsQuery, {}, { next: { revalidate: 0 } })
+        client.fetch(heroQuery),
+        client.fetch(aboutQuery),
+        client.fetch(collabsQuery),
+        client.fetch(momentsQuery),
+        client.fetch(testimonialsQuery),
+        client.fetch(servicesQuery),
+        client.fetch(footprintQuery),
+        client.fetch(showrunnersQuery),
+        client.fetch(statsQuery)
       ]);
 
       [
@@ -70,7 +72,6 @@ export default async function HomePage() {
       ] = results;
       
       console.log("Sanity fetch successful!");
-      console.log("momentsData:", JSON.stringify(momentsData, null, 2));
     } catch (error) {
       console.error("Sanity connection failed:", error);
     }

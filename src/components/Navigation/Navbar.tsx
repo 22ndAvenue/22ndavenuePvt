@@ -343,7 +343,7 @@ export function Navbar() {
           <Link href="/" className={styles.logoLink}>
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <img
-                src="assets/hero/logo.png"
+                src="/assets/hero/logo.webp"
                 alt="22nd Avenue Logo"
                 className={`${styles.logoImage} ${styles.logoSmall}`}
               />
@@ -395,7 +395,7 @@ export function Navbar() {
         >
           <Link href="/" className={styles.mobileLogoLink}>
             <img
-              src="assets/hero/logo.png"
+              src="/assets/hero/logo.webp"
               alt="Logo"
               className={`${styles.mobileLogoImage} ${styles.mobileLogoSmall}`}
             />
@@ -432,7 +432,7 @@ export function Navbar() {
               
               <div className={styles.mobileDrawerContent}>
                 <div className={styles.mobileDrawerHeader}>
-                  <img src="assets/hero/logo.png" alt="Logo" className={styles.mobileDrawerLogo} />
+                  <img src="/assets/hero/logo.webp" alt="Logo" className={styles.mobileDrawerLogo} />
                   <button onClick={() => setIsMobileMenuOpen(false)} className={styles.mobileCloseBtn}>
                     <X size={28} />
                   </button>

@@ -122,7 +122,7 @@ export function GlobalFootprint({ data }: { data?: { image: string } }) {
           <div className={`${styles.mapWrapper} ${hasEntered ? styles.mapEntered : ""}`}>
             {/* World Map Image */}
             <img
-              src={data?.image || "/assets/hero/Global map.png"}
+              src={data?.image || "/assets/hero/global-map.webp"}
               alt="Global Footprint Map"
               className={styles.mapImage}
               loading="lazy"

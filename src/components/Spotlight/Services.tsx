@@ -582,7 +582,7 @@ export function Services({ data }: ServicesProps) {
                   >
                     <div className={styles.cardBorderGlow}></div>
                     <div className={`${styles.imageWrapper} ${styles[service.shape]}`}>
-                      <img src={service.image} alt={service.title} className={styles.image} />
+                      <img src={service.image} alt={service.title} className={styles.image} loading="lazy" decoding="async" />
                       <div className={styles.cinemaOverlay}></div>
                       <div className={styles.cardContent}>
                         <div className={styles.contentInner}>

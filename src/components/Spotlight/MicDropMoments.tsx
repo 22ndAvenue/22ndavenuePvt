@@ -39,6 +39,7 @@ interface ShowcaseTile {
   mobileImage?: string;
   video?: string;
   mobileVideo?: string;
+  poster?: string;
 }
 
 interface ShowcaseCategory {
@@ -160,7 +161,7 @@ const DEFAULT_CATEGORIES: ShowcaseCategory[] = [
   }
 ];
 
-import { getDirectVideoUrl, getDirectImageUrl } from "@/utils/video";
+import { getDirectVideoUrl, getDirectImageUrl, extractDriveId, getLocalPosterPath } from "@/utils/video";
 
 /**
  * Sanity CDN serves file assets (videos, PDFs, etc.) with
@@ -201,12 +202,12 @@ export function MicDropMoments({ data }: MicDropMomentsProps) {
         // Resolve desktop & mobile images (prioritize Drive/external URL, fallback to Sanity Asset)
         let resolvedImage = t.imageUrl ? getDirectImageUrl(t.imageUrl) : "";
         if (!resolvedImage && t.imageAsset) {
-          resolvedImage = t.imageAsset + "?w=1200&h=800&fit=crop&auto=format&q=80&fm=webp";
+          resolvedImage = t.imageAsset + "?w=1200&h=800&fit=crop&auto=format&q=75&fm=webp";
         }
 
-        let resolvedMobileImage = t.mobileImageUrl ? getDirectImageUrl(t.mobileImageUrl) : "";
+        let resolvedMobileImage = t.mobileImageUrl ? getDirectImageUrl(t.mobileImageUrl, 800) : "";
         if (!resolvedMobileImage && t.mobileImageAsset) {
-          resolvedMobileImage = t.mobileImageAsset + "?w=800&h=1200&fit=crop&auto=format&q=80&fm=webp";
+          resolvedMobileImage = t.mobileImageAsset + "?w=800&h=1200&fit=crop&auto=format&q=75&fm=webp";
         }
 
         // Resolve videos (prioritize Drive/external URL, fallback to Sanity Asset)
@@ -215,6 +216,8 @@ export function MicDropMoments({ data }: MicDropMomentsProps) {
         const rawMobileVideoUrl = t.mobileVideoUrl || t.mobileVideoAsset || t.mobileVideo;
         const resolvedVideo = getDirectVideoUrl(rawVideoUrl ? makeSanityFileInline(rawVideoUrl) : undefined);
         const resolvedMobileVideo = getDirectVideoUrl(rawMobileVideoUrl ? makeSanityFileInline(rawMobileVideoUrl) : undefined);
+        // First frame of the compressed video, shown while the video buffers
+        const poster = getLocalPosterPath(extractDriveId(rawVideoUrl));
 
         return {
           id: `${t.title || "Moment"}-${index}`,
@@ -225,6 +228,7 @@ export function MicDropMoments({ data }: MicDropMomentsProps) {
           mobileImage: resolvedMobileImage || t.mobileImage || resolvedImage || t.image || "",
           video: resolvedVideo,
           mobileVideo: resolvedMobileVideo || resolvedVideo,
+          poster,
         };
       }),
     }));
@@ -235,9 +239,27 @@ export function MicDropMoments({ data }: MicDropMomentsProps) {
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [isSliding, setIsSliding] = useState(false);
   const [isMuted, setIsMuted] = useState(true);
+  // Only mount <video> once the section is close to the viewport — until then
+  // the tile shows its image and no video bytes are requested at all.
+  const [isNearViewport, setIsNearViewport] = useState(false);
 
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const sectionRef = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    if (!sectionRef.current) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries.some((e) => e.isIntersecting)) {
+          setIsNearViewport(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: "400px 0px" }
+    );
+    observer.observe(sectionRef.current);
+    return () => observer.disconnect();
+  }, []);
 
   // Callback ref to reliably attach to the active video element and trigger play
   const setVideoRef = (el: HTMLVideoElement | null) => {
@@ -350,17 +372,20 @@ export function MicDropMoments({ data }: MicDropMomentsProps) {
                   {/* Background Image & Video */}
                   <div className={styles.bgImageContainer}>
                     <img
-                      src={isMobile ? tile.mobileImage : tile.image}
+                      src={(isMobile ? tile.mobileImage : tile.image) || tile.poster}
                       alt={tile.title}
                       className={styles.bgImage}
+                      loading="lazy"
+                      decoding="async"
                     />
-                    {activeIndex === index && (isMobile ? tile.mobileVideo : tile.video) && (
+                    {isNearViewport && activeIndex === index && (isMobile ? tile.mobileVideo : tile.video) && (
                       <>
                         <video
                           ref={setVideoRef}
                           key={`${activeCategoryIndex}-${index}-${isMobile ? 'mobile' : 'desktop'}-${isMobile ? tile.mobileVideo : tile.video}`}
                           src={isMobile ? tile.mobileVideo : tile.video}
                           className={`${styles.bgVideo} ${isMobile ? styles.bgVideoMobile : ''}`}
+                          poster={tile.poster}
                           autoPlay
                           loop
                           muted={isMuted}

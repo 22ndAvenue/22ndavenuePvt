@@ -113,6 +113,8 @@ export function AboutHome({ data }: AboutHomeProps) {
                           }
                           alt={founder.name}
                           className={styles.founderImg}
+                          loading={idx === 0 ? "eager" : "lazy"}
+                          decoding="async"
                         />
                       </div>
                     ))}

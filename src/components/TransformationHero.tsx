@@ -13,7 +13,7 @@ interface TransformationHeroProps {
   };
 }
 
-import { getDirectVideoUrl } from "@/utils/video";
+import { getDirectVideoUrl, extractDriveId, getLocalPosterPath } from "@/utils/video";
 
 const TransformationHero = ({ data }: TransformationHeroProps) => {
   const [isSplit, setIsSplit] = useState(false);
@@ -24,6 +24,7 @@ const TransformationHero = ({ data }: TransformationHeroProps) => {
 
   const rawVideoUrl = (isMobile && data?.mobileVideoUrl ? data.mobileVideoUrl : data?.desktopVideoUrl) || "/assets/hero/Intro AV.mp4";
   const videoSrc = getDirectVideoUrl(rawVideoUrl);
+  const poster = data?.fallbackImage || getLocalPosterPath(extractDriveId(rawVideoUrl));
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -161,7 +162,7 @@ const TransformationHero = ({ data }: TransformationHeroProps) => {
               <span className={`${styles.splashWord} ${styles.wordAre}`}>ARE</span>
             </div>
             <div className={`${styles.splashWord} ${styles.splashLogoWrapper}`}>
-              <img src="/assets/hero/logo.png" alt="22nd Avenue Logo" className={styles.splashLogo} />
+              <img src="/assets/hero/logo.webp" alt="22nd Avenue Logo" className={styles.splashLogo} width={370} height={310} fetchPriority="high" />
             </div>
           </h2>
         </div>
@@ -177,11 +178,12 @@ const TransformationHero = ({ data }: TransformationHeroProps) => {
             key={videoSrc}
             ref={videoRef}
             src={videoSrc}
-            poster={data?.fallbackImage}
+            poster={poster}
             className={styles.showcaseVideo}
             loop
             muted={isMuted}
             playsInline
+            preload="metadata"
           />
         </div>
 

@@ -15,7 +15,7 @@ function getImageUrl(imageSource: any) {
   if (!imageSource) return "";
   if (typeof imageSource === "string") return imageSource;
   try {
-    return builder.image(imageSource).width(400).height(500).fit("crop").auto("format").url();
+    return builder.image(imageSource).width(400).height(500).fit("crop").auto("format").quality(75).url();
   } catch (err) {
     console.error("Error building image URL:", err);
     return "";
@@ -230,7 +230,7 @@ export function Testimonials({ data }: TestimonialsProps) {
                     onClick={() => isVideo && t.video && setVideoModal(t.video)}
                   >
                     <div className={styles.mediaArea}>
-                      <img src={t.image} alt={t.name} className={styles.pillImage} />
+                      <img src={t.image} alt={t.name} className={styles.pillImage} loading="lazy" decoding="async" />
 
                       {isVideo && (
                         <div className={styles.playBadge}>
@@ -344,6 +344,7 @@ export function Testimonials({ data }: TestimonialsProps) {
               autoPlay
               controls
               playsInline
+              preload="metadata"
             />
           </div>
         </div>,

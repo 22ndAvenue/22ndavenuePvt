@@ -25,7 +25,7 @@ function getImageUrl(imageSource: any) {
   if (typeof imageSource === "string") return imageSource;
   try {
     // Generate cropped image URL that respects hotspot coordinates
-    return builder.image(imageSource).width(400).height(500).fit("crop").auto("format").url();
+    return builder.image(imageSource).width(400).height(500).fit("crop").auto("format").quality(75).url();
   } catch (err) {
     console.error("Error building image URL:", err);
     return "";

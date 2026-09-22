@@ -15,7 +15,7 @@ function getImageUrl(imageSource: any) {
   if (!imageSource) return "";
   if (typeof imageSource === "string") return imageSource;
   try {
-    return builder.image(imageSource).width(500).height(500).fit("crop").auto("format").url();
+    return builder.image(imageSource).width(500).height(500).fit("crop").auto("format").quality(75).url();
   } catch {
     return "";
   }
@@ -181,6 +181,8 @@ export function Showrunners({ data }: ShowrunnersProps) {
                         src={member.image}
                         alt={member.name}
                         className={styles.image}
+                        loading="lazy"
+                        decoding="async"
                       />
                     </div>
                   </div>
