@@ -236,26 +236,6 @@
   transform: scale(1);
 }
 
-/* Shown only when the browser refused autoplay (e.g. iOS Low Power Mode) */
-.tapToPlay {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 72px;
-  height: 72px;
-  border-radius: 50%;
-  border: 1px solid rgba(255, 255, 255, 0.6);
-  background: rgba(0, 0, 0, 0.45);
-  color: #fff;
-  font-size: 1.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  z-index: 20;
-}
-
 /* Video Controls Overlay */
 .videoControls {
   position: absolute;

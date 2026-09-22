@@ -22,7 +22,6 @@ const TransformationHero = ({ data }: TransformationHeroProps) => {
   // Don't attach a src until we know the viewport: on phones the server-rendered
   // markup would otherwise request the desktop file and then swap to mobile.
   const [mounted, setMounted] = useState(false);
-  const [needsTap, setNeedsTap] = useState(false); // iOS Low Power Mode blocks autoplay
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLElement>(null);
 
@@ -67,7 +66,7 @@ const TransformationHero = ({ data }: TransformationHeroProps) => {
     let done = false;
     const tryPlay = () => {
       if (done || !v.paused) return;
-      v.play().then(() => { done = true; setNeedsTap(false); }).catch(() => { /* retried below */ });
+      v.play().then(() => { done = true; }).catch(() => { /* retried below */ });
     };
 
     v.currentTime = 0;
@@ -77,10 +76,7 @@ const TransformationHero = ({ data }: TransformationHeroProps) => {
     document.addEventListener("touchstart", tryPlay, { passive: true });
     document.addEventListener("click", tryPlay);
 
-    const graceTimer = setTimeout(() => { if (v.paused) setNeedsTap(true); }, 2500);
-
     return () => {
-      clearTimeout(graceTimer);
       v.removeEventListener("loadeddata", tryPlay);
       v.removeEventListener("canplay", tryPlay);
       document.removeEventListener("touchstart", tryPlay);
@@ -188,11 +184,6 @@ const TransformationHero = ({ data }: TransformationHeroProps) => {
     };
   }, [isSplit]);
 
-  const playOnTap = () => {
-    if (!videoRef.current) return;
-    videoRef.current.play().then(() => setNeedsTap(false)).catch(() => {});
-  };
-
   const toggleMute = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (videoRef.current) {
@@ -225,7 +216,7 @@ const TransformationHero = ({ data }: TransformationHeroProps) => {
         ref={rightPanelRef}
         className={styles.rightPanel}
       >
-        <div className={styles.videoContainer} onClick={needsTap ? playOnTap : undefined}>
+        <div className={styles.videoContainer}>
           <video
             key={mounted ? videoSrc : "pending"}
             ref={videoRef}
@@ -238,11 +229,6 @@ const TransformationHero = ({ data }: TransformationHeroProps) => {
             // The splash animation runs ~3.8s before play(); use that window to buffer
             preload="auto"
           />
-          {needsTap && (
-            <button className={styles.tapToPlay} onClick={playOnTap} aria-label="Play video">
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z" /></svg>
-            </button>
-          )}
         </div>
 
         <div className={styles.overlay} />
