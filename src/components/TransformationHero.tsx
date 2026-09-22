@@ -19,6 +19,10 @@ const TransformationHero = ({ data }: TransformationHeroProps) => {
   const [isSplit, setIsSplit] = useState(false);
   const [isMuted, setIsMuted] = useState(true); // Auto-play requires mute initially
   const [isMobile, setIsMobile] = useState(false);
+  // Don't attach a src until we know the viewport: on phones the server-rendered
+  // markup would otherwise request the desktop file and then swap to mobile.
+  const [mounted, setMounted] = useState(false);
+  const [needsTap, setNeedsTap] = useState(false); // iOS Low Power Mode blocks autoplay
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLElement>(null);
 
@@ -29,6 +33,7 @@ const TransformationHero = ({ data }: TransformationHeroProps) => {
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
     handleResize();
+    setMounted(true);
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
@@ -37,7 +42,7 @@ const TransformationHero = ({ data }: TransformationHeroProps) => {
   useEffect(() => {
     if (isSplit && videoRef.current) {
       videoRef.current.currentTime = 0;
-      videoRef.current.play().catch(err => console.log("Play prevented:", err));
+      videoRef.current.play().then(() => setNeedsTap(false)).catch(() => setNeedsTap(true));
     }
   }, [isSplit]);
 
@@ -141,6 +146,11 @@ const TransformationHero = ({ data }: TransformationHeroProps) => {
     };
   }, [isSplit]);
 
+  const playOnTap = () => {
+    if (!videoRef.current) return;
+    videoRef.current.play().then(() => setNeedsTap(false)).catch(() => {});
+  };
+
   const toggleMute = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (videoRef.current) {
@@ -173,18 +183,24 @@ const TransformationHero = ({ data }: TransformationHeroProps) => {
         ref={rightPanelRef}
         className={styles.rightPanel}
       >
-        <div className={styles.videoContainer}>
+        <div className={styles.videoContainer} onClick={needsTap ? playOnTap : undefined}>
           <video
-            key={videoSrc}
+            key={mounted ? videoSrc : "pending"}
             ref={videoRef}
-            src={videoSrc}
+            src={mounted ? videoSrc : undefined}
             poster={poster}
             className={styles.showcaseVideo}
             loop
             muted={isMuted}
             playsInline
-            preload="metadata"
+            // The splash animation runs ~3.8s before play(); use that window to buffer
+            preload="auto"
           />
+          {needsTap && (
+            <button className={styles.tapToPlay} onClick={playOnTap} aria-label="Play video">
+              ▶
+            </button>
+          )}
         </div>
 
         <div className={styles.overlay} />
