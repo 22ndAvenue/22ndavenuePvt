@@ -17,8 +17,10 @@ for id in "$@"; do
   echo "→ downloading $id"
   curl -sL -c "$TMP/cj" "https://drive.google.com/uc?export=download&id=$id" -o "$raw"
   if file "$raw" | grep -q HTML; then   # large-file virus-scan interstitial
-    tok=$(grep -o 'confirm=[a-zA-Z0-9_-]*' "$raw" | head -1 | cut -d= -f2)
-    uuid=$(grep -o 'name="uuid" value="[^"]*"' "$raw" | head -1 | sed 's/.*value="//;s/"//')
+    # `|| true`: newer interstitials have no confirm= token, and under pipefail
+    # a non-matching grep would silently abort the whole run
+    tok=$(grep -o 'confirm=[a-zA-Z0-9_-]*' "$raw" | head -1 | cut -d= -f2 || true)
+    uuid=$(grep -o 'name="uuid" value="[^"]*"' "$raw" | head -1 | sed 's/.*value="//;s/"//' || true)
     curl -sL -b "$TMP/cj" "https://drive.usercontent.google.com/download?id=$id&export=download&confirm=${tok:-t}&uuid=$uuid" -o "$raw"
   fi
 
